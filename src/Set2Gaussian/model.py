@@ -5,11 +5,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from .utils import *
 #from tensorflow_probability import distributions as tfd
 import sys
-from scipy.optimize import minimize
-from scipy import stats
-import GPUtil
 import time
-import psutil
 
 
 class Graph2Gauss:

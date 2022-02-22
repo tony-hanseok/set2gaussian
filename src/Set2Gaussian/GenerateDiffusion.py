@@ -9,16 +9,11 @@ import sys
 import random
 import os
 from scipy import sparse
-from scipy import spatial
-from sklearn import metrics
-from sklearn.svm import SVC
 import cPickle as pickle
-from sklearn.model_selection import GridSearchCV,KFold
 from BioNetwork import BioNetwork
 import scipy.spatial as sp
-from sklearn.decomposition import SparsePCA
 import time
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 class GenerateDiffusion:
 	def __init__(self, Node_RWR, gene_set_file, Net_obj = None):
@@ -36,11 +31,11 @@ class GenerateDiffusion:
 		self.p2i = {}
 		for i,line in enumerate(fin):
 			f,g = line.strip().split('\t')
-			if g.upper() not in g2i or f.startswith('GO_'):
+			if g.lower() not in g2i or f.startswith('GO_'):
 				continue
 			if f not in self.p2i:
 				self.p2i[f] = len(self.p2i)
-			self.path2gene[f][g2i[g.upper()]] = 1
+			self.path2gene[f][g2i[g.lower()]] = 1
 		fin.close()
 		self.i2p = {}
 		for p in self.p2i:

@@ -6,11 +6,9 @@ import collections
 import operator
 import sys
 import random
-from scipy import stats
 import gc
 import os
 import matplotlib
-from sklearn import metrics
 import cPickle as pickle
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -19,7 +17,7 @@ from Set2Gaussian.RandomWalkRestart import RandomWalkRestart, DCA_vector
 from Set2Gaussian.GenerateDiffusion import GenerateDiffusion
 from Set2Gaussian.utils import evaluate_pathway_member
 from Set2Gaussian.model import Graph2Gauss
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 import scipy.spatial as sp
 
 
@@ -39,6 +37,7 @@ def read_node_embedding(DCA_dim,network_file, DCA_rst=0.8):
 
 def create_matrix(Node_RWR, Net_obj, p_train, gene_set_file):
 	GR_obj = GenerateDiffusion(Node_RWR, gene_set_file, Net_obj=Net_obj)
+	p2i = GR_obj.p2i
 	_, Path_mat_train_all, Path_mat_test_all, _, _ = GR_obj.RunDiffusion(p_train=p_train, random_state=0,all_gene_cv=False)
 
 	npath,nnode = np.shape(Path_mat_train_all)
@@ -51,13 +50,15 @@ def create_matrix(Node_RWR, Net_obj, p_train, gene_set_file):
 	log_Path_RWR = -1 * np.log(Path_RWR +alpha)
 	train_ind, test_ind = train_test_split(range(nnode), test_size=0.01)
 	train_ind = np.array(range(nnode))
-	return Path_RWR, log_Path_RWR, log_node_RWR, train_ind, test_ind, Path_mat_train_all, Path_mat_test_all
+	return Path_RWR, log_Path_RWR, log_node_RWR, train_ind, test_ind, Path_mat_train_all, Path_mat_test_all, p2i
 
-def save_mbedding(p2g, path_mu, path_cov, Grep_node_emb, output_file):
+def save_embedding(p2g, path_mu, path_cov, Grep_node_emb, p2i, output_file):
 	np.save(output_file + 'p2g.out', p2g)
 	np.save(output_file + 'path_mu.out', path_mu)
 	np.save(output_file + 'path_cov.out', path_cov)
 	np.save(output_file + 'g2g_node_emb.out', Grep_node_emb)
+	with open(output_file + 'g2i', "wb") as f:
+		pickle.dump(p2i, f)
 
 def run_embedding_method(method,log_Path_RWR, log_node_RWR, Path_RWR, node_emb, node_context,train_ind,test_ind, Path_mat_train, para_dict, metric= 'cosine'):
 	npath, nnode = np.shape(Path_RWR)
